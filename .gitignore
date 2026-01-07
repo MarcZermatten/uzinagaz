@@ -1,0 +1,38 @@
+# Backend (Rust)
+/backend/target/
+/backend/.env
+/backend/Cargo.lock
+
+# Frontend (Node.js)
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.env.local
+
+# Storage
+/storage/roms/*
+/storage/saves/*
+!storage/roms/.gitkeep
+!storage/saves/.gitkeep
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude
+.claude/plans/

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(dir \"C:\\\\Users\\\\Marc\\\\Leon\\\\projets\\\\Zerver\")",
+      "Bash(mkdir:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker compose:*)",
+      "Bash(mount:*)",
+      "Bash(wsl.exe --shutdown)",
+      "Bash(ssh:*)",
+      "Bash(ls:*)",
+      "Bash(tasklist:*)",
+      "Bash(sc query:*)",
+      "Bash(where:*)",
+      "Bash(psql:*)",
+      "Bash(taskkill:*)",
+      "Bash(RUST_LOG=debug cargo run:*)",
+      "Bash(tee:*)",
+      "Bash(curl:*)",
+      "Bash(xargs kill:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 65924 -Force\")",
+      "Bash(set:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(\"C:\\\\Program Files\\\\PostgreSQL\\\\16\\\\bin\\\\psql.exe\":*)",
+      "Bash(powershell -Command \"Stop-Process -Name zerver -Force\")"
+    ]
+  }
+}
