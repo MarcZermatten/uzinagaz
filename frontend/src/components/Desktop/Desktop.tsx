@@ -8,11 +8,22 @@ import { WindowManager } from '../Windows/WindowManager';
 import { ScreenCalibrator } from './ScreenCalibrator';
 import './Desktop.css';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 interface ScreenBounds {
-  topLeft: { x: number; y: number };
-  topRight: { x: number; y: number };
-  bottomLeft: { x: number; y: number };
-  bottomRight: { x: number; y: number };
+  // Coins
+  topLeft: Point;
+  topRight: Point;
+  bottomLeft: Point;
+  bottomRight: Point;
+  // Points de courbure
+  topMiddle: Point;
+  rightMiddle: Point;
+  bottomMiddle: Point;
+  leftMiddle: Point;
 }
 
 export const Desktop = () => {
@@ -48,8 +59,12 @@ export const Desktop = () => {
 
   const getClipPath = () => {
     if (!screenBounds) return 'none';
-    const { topLeft, topRight, bottomRight, bottomLeft } = screenBounds;
-    return `polygon(${topLeft.x}% ${topLeft.y}%, ${topRight.x}% ${topRight.y}%, ${bottomRight.x}% ${bottomRight.y}%, ${bottomLeft.x}% ${bottomLeft.y}%)`;
+    const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
+
+    // Créer un path SVG avec des courbes de Bézier quadratiques pour les courbures CRT
+    const svgPath = `M ${topLeft.x}% ${topLeft.y}% Q ${topMiddle.x}% ${topMiddle.y}% ${topRight.x}% ${topRight.y}% Q ${rightMiddle.x}% ${rightMiddle.y}% ${bottomRight.x}% ${bottomRight.y}% Q ${bottomMiddle.x}% ${bottomMiddle.y}% ${bottomLeft.x}% ${bottomLeft.y}% Q ${leftMiddle.x}% ${leftMiddle.y}% ${topLeft.x}% ${topLeft.y}% Z`;
+
+    return `path('${svgPath}')`;
   };
 
   const getScreenStyle = (): React.CSSProperties => {
@@ -64,9 +79,27 @@ export const Desktop = () => {
       };
     }
 
-    // Calculate bounding box from the 4 corners
-    const xs = [screenBounds.topLeft.x, screenBounds.topRight.x, screenBounds.bottomLeft.x, screenBounds.bottomRight.x];
-    const ys = [screenBounds.topLeft.y, screenBounds.topRight.y, screenBounds.bottomLeft.y, screenBounds.bottomRight.y];
+    // Calculate bounding box from all 8 points
+    const xs = [
+      screenBounds.topLeft.x,
+      screenBounds.topRight.x,
+      screenBounds.bottomLeft.x,
+      screenBounds.bottomRight.x,
+      screenBounds.topMiddle.x,
+      screenBounds.rightMiddle.x,
+      screenBounds.bottomMiddle.x,
+      screenBounds.leftMiddle.x,
+    ];
+    const ys = [
+      screenBounds.topLeft.y,
+      screenBounds.topRight.y,
+      screenBounds.bottomLeft.y,
+      screenBounds.bottomRight.y,
+      screenBounds.topMiddle.y,
+      screenBounds.rightMiddle.y,
+      screenBounds.bottomMiddle.y,
+      screenBounds.leftMiddle.y,
+    ];
 
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);

@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 import './ScreenCalibrator.css';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 interface ScreenBounds {
-  topLeft: { x: number; y: number };
-  topRight: { x: number; y: number };
-  bottomLeft: { x: number; y: number };
-  bottomRight: { x: number; y: number };
+  // Coins
+  topLeft: Point;
+  topRight: Point;
+  bottomLeft: Point;
+  bottomRight: Point;
+  // Points de courbure (milieu de chaque côté)
+  topMiddle: Point;
+  rightMiddle: Point;
+  bottomMiddle: Point;
+  leftMiddle: Point;
 }
 
 const DEFAULT_BOUNDS: ScreenBounds = {
@@ -13,6 +24,10 @@ const DEFAULT_BOUNDS: ScreenBounds = {
   topRight: { x: 69, y: 15 },
   bottomLeft: { x: 31, y: 53 },
   bottomRight: { x: 69, y: 53 },
+  topMiddle: { x: 50, y: 14 },
+  rightMiddle: { x: 70, y: 34 },
+  bottomMiddle: { x: 50, y: 54 },
+  leftMiddle: { x: 30, y: 34 },
 };
 
 export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) => void }) => {
@@ -59,9 +74,18 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
     localStorage.removeItem('zerver-screen-bounds');
   };
 
-  const getPolygonPath = () => {
-    const { topLeft, topRight, bottomRight, bottomLeft } = bounds;
-    return `${topLeft.x}% ${topLeft.y}%, ${topRight.x}% ${topRight.y}%, ${bottomRight.x}% ${bottomRight.y}%, ${bottomLeft.x}% ${bottomLeft.y}%`;
+  const getSVGPath = () => {
+    const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = bounds;
+
+    // Créer un path SVG avec des courbes de Bézier quadratiques pour les courbures CRT
+    return `
+      M ${topLeft.x} ${topLeft.y}
+      Q ${topMiddle.x} ${topMiddle.y} ${topRight.x} ${topRight.y}
+      Q ${rightMiddle.x} ${rightMiddle.y} ${bottomRight.x} ${bottomRight.y}
+      Q ${bottomMiddle.x} ${bottomMiddle.y} ${bottomLeft.x} ${bottomLeft.y}
+      Q ${leftMiddle.x} ${leftMiddle.y} ${topLeft.x} ${topLeft.y}
+      Z
+    `.trim();
   };
 
   return (
@@ -86,47 +110,68 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
         )}
 
         <svg className="calibration-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {/* Screen area polygon */}
-          <polygon
-            points={getPolygonPath()}
+          {/* Screen area avec courbes CRT */}
+          <path
+            d={getSVGPath()}
             fill="rgba(0, 200, 255, 0.1)"
             stroke="rgba(0, 200, 255, 0.8)"
             strokeWidth="0.3"
-            strokeDasharray="1,1"
           />
 
-          {/* Connection lines */}
-          <line x1={bounds.topLeft.x} y1={bounds.topLeft.y} x2={bounds.topRight.x} y2={bounds.topRight.y} stroke="rgba(0, 200, 255, 0.6)" strokeWidth="0.2" />
-          <line x1={bounds.topRight.x} y1={bounds.topRight.y} x2={bounds.bottomRight.x} y2={bounds.bottomRight.y} stroke="rgba(0, 200, 255, 0.6)" strokeWidth="0.2" />
-          <line x1={bounds.bottomRight.x} y1={bounds.bottomRight.y} x2={bounds.bottomLeft.x} y2={bounds.bottomLeft.y} stroke="rgba(0, 200, 255, 0.6)" strokeWidth="0.2" />
-          <line x1={bounds.bottomLeft.x} y1={bounds.bottomLeft.y} x2={bounds.topLeft.x} y2={bounds.topLeft.y} stroke="rgba(0, 200, 255, 0.6)" strokeWidth="0.2" />
+          {/* Lignes de guidage vers les points de courbure */}
+          <line x1={bounds.topLeft.x} y1={bounds.topLeft.y} x2={bounds.topMiddle.x} y2={bounds.topMiddle.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+          <line x1={bounds.topMiddle.x} y1={bounds.topMiddle.y} x2={bounds.topRight.x} y2={bounds.topRight.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+
+          <line x1={bounds.topRight.x} y1={bounds.topRight.y} x2={bounds.rightMiddle.x} y2={bounds.rightMiddle.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+          <line x1={bounds.rightMiddle.x} y1={bounds.rightMiddle.y} x2={bounds.bottomRight.x} y2={bounds.bottomRight.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+
+          <line x1={bounds.bottomRight.x} y1={bounds.bottomRight.y} x2={bounds.bottomMiddle.x} y2={bounds.bottomMiddle.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+          <line x1={bounds.bottomMiddle.x} y1={bounds.bottomMiddle.y} x2={bounds.bottomLeft.x} y2={bounds.bottomLeft.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+
+          <line x1={bounds.bottomLeft.x} y1={bounds.bottomLeft.y} x2={bounds.leftMiddle.x} y2={bounds.leftMiddle.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
+          <line x1={bounds.leftMiddle.x} y1={bounds.leftMiddle.y} x2={bounds.topLeft.x} y2={bounds.topLeft.y} stroke="rgba(255, 200, 0, 0.3)" strokeWidth="0.1" strokeDasharray="0.5,0.5" />
         </svg>
 
-        {/* Draggable corners */}
-        {(Object.keys(bounds) as Array<keyof ScreenBounds>).map((corner) => (
-          <div
-            key={corner}
-            className={`calibration-point ${dragging === corner ? 'dragging' : ''}`}
-            style={{
-              left: `${bounds[corner].x}%`,
-              top: `${bounds[corner].y}%`,
-            }}
-            onMouseDown={() => handleMouseDown(corner)}
-          >
-            <div className="point-label">
-              {corner.replace(/([A-Z])/g, ' $1').trim()}
-              <br />
-              <span className="point-coords">
-                {bounds[corner].x.toFixed(1)}%, {bounds[corner].y.toFixed(1)}%
-              </span>
+        {/* Draggable points */}
+        {(Object.keys(bounds) as Array<keyof ScreenBounds>).map((pointName) => {
+          const isCorner = pointName.includes('Left') || pointName.includes('Right');
+          const isCurvePoint = pointName.includes('Middle');
+
+          return (
+            <div
+              key={pointName}
+              className={`calibration-point ${dragging === pointName ? 'dragging' : ''} ${isCurvePoint ? 'curve-point' : 'corner-point'}`}
+              style={{
+                left: `${bounds[pointName].x}%`,
+                top: `${bounds[pointName].y}%`,
+              }}
+              onMouseDown={() => handleMouseDown(pointName)}
+            >
+              <div className="point-label">
+                {pointName.replace(/([A-Z])/g, ' $1').trim()}
+                <br />
+                <span className="point-coords">
+                  {bounds[pointName].x.toFixed(1)}%, {bounds[pointName].y.toFixed(1)}%
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="calibrator-controls">
         <h2>🖥️ Calibration de l'écran CRT</h2>
-        <p>Déplace les 4 coins pour mapper l'écran Windows XP sur ton moniteur CRT</p>
+        <p>Déplace les points pour mapper l'écran Windows XP sur ton moniteur CRT avec ses courbures</p>
+        <div style={{ fontSize: '11px', color: '#aaa', marginBottom: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '5px' }}>
+            <div style={{ width: '12px', height: '12px', background: 'rgba(0, 200, 255, 0.8)', borderRadius: '50%' }}></div>
+            <span>Points de coins (bleus) - 4 angles de l'écran</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ width: '12px', height: '12px', background: 'rgba(255, 165, 0, 0.8)', borderRadius: '50%' }}></div>
+            <span>Points de courbure (oranges) - milieu des bords</span>
+          </div>
+        </div>
 
         <div className="control-buttons">
           <button onClick={handleSave} className="btn-save">
