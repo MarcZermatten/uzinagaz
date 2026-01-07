@@ -32,6 +32,8 @@ export const Desktop = () => {
   const isPlaying = useGameStore((state) => state.isPlaying);
   const [showCalibrator, setShowCalibrator] = useState(false);
   const [screenBounds, setScreenBounds] = useState<ScreenBounds | null>(null);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+  const [, forceUpdate] = useState({});
 
   useEffect(() => {
     // Load screen bounds from localStorage
@@ -39,6 +41,13 @@ export const Desktop = () => {
     if (saved) {
       setScreenBounds(JSON.parse(saved));
     }
+
+    // Load image to get aspect ratio
+    const img = new Image();
+    img.src = '/assets/retro-desk-scene.png';
+    img.onload = () => {
+      setImageAspectRatio(img.width / img.height);
+    };
 
     // Listen for Ctrl+Shift+C to open calibrator
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,8 +57,18 @@ export const Desktop = () => {
       }
     };
 
+    // Force re-render on window resize to recalculate positions
+    const handleResize = () => {
+      forceUpdate({});
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const handleSaveBounds = (bounds: ScreenBounds) => {
@@ -57,12 +76,62 @@ export const Desktop = () => {
     setShowCalibrator(false);
   };
 
+  // Calculate where the background image actually sits within the container
+  const getImageBounds = () => {
+    if (!imageAspectRatio) return null;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowAspectRatio = windowWidth / windowHeight;
+
+    let imageWidth: number, imageHeight: number, offsetX: number, offsetY: number;
+
+    if (windowAspectRatio > imageAspectRatio) {
+      // Window is wider - image is letterboxed (bars on sides)
+      imageHeight = windowHeight;
+      imageWidth = windowHeight * imageAspectRatio;
+      offsetX = (windowWidth - imageWidth) / 2;
+      offsetY = 0;
+    } else {
+      // Window is taller - image is pillarboxed (bars on top/bottom)
+      imageWidth = windowWidth;
+      imageHeight = windowWidth / imageAspectRatio;
+      offsetX = 0;
+      offsetY = (windowHeight - imageHeight) / 2;
+    }
+
+    return {
+      width: imageWidth,
+      height: imageHeight,
+      offsetX,
+      offsetY,
+      // Convert percentage to absolute within image
+      toAbsolute: (x: number, y: number) => ({
+        x: offsetX + (x / 100) * imageWidth,
+        y: offsetY + (y / 100) * imageHeight,
+      }),
+    };
+  };
+
   const getClipPath = () => {
     if (!screenBounds) return 'none';
+    const imageBounds = getImageBounds();
+    if (!imageBounds) return 'none';
+
     const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
 
+    // Convert percentage coords to absolute pixels
+    const tl = imageBounds.toAbsolute(topLeft.x, topLeft.y);
+    const tr = imageBounds.toAbsolute(topRight.x, topRight.y);
+    const br = imageBounds.toAbsolute(bottomRight.x, bottomRight.y);
+    const bl = imageBounds.toAbsolute(bottomLeft.x, bottomLeft.y);
+    const tm = imageBounds.toAbsolute(topMiddle.x, topMiddle.y);
+    const rm = imageBounds.toAbsolute(rightMiddle.x, rightMiddle.y);
+    const bm = imageBounds.toAbsolute(bottomMiddle.x, bottomMiddle.y);
+    const lm = imageBounds.toAbsolute(leftMiddle.x, leftMiddle.y);
+
     // Créer un path SVG avec des courbes de Bézier quadratiques pour les courbures CRT
-    const svgPath = `M ${topLeft.x}% ${topLeft.y}% Q ${topMiddle.x}% ${topMiddle.y}% ${topRight.x}% ${topRight.y}% Q ${rightMiddle.x}% ${rightMiddle.y}% ${bottomRight.x}% ${bottomRight.y}% Q ${bottomMiddle.x}% ${bottomMiddle.y}% ${bottomLeft.x}% ${bottomLeft.y}% Q ${leftMiddle.x}% ${leftMiddle.y}% ${topLeft.x}% ${topLeft.y}% Z`;
+    const svgPath = `M ${tl.x}px ${tl.y}px Q ${tm.x}px ${tm.y}px ${tr.x}px ${tr.y}px Q ${rm.x}px ${rm.y}px ${br.x}px ${br.y}px Q ${bm.x}px ${bm.y}px ${bl.x}px ${bl.y}px Q ${lm.x}px ${lm.y}px ${tl.x}px ${tl.y}px Z`;
 
     return `path('${svgPath}')`;
   };
@@ -79,7 +148,18 @@ export const Desktop = () => {
       };
     }
 
-    // Calculate bounding box from all 8 points
+    const imageBounds = getImageBounds();
+    if (!imageBounds) {
+      return {
+        top: '15%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '37%',
+        height: '38%',
+      };
+    }
+
+    // Calculate bounding box from all 8 points in percentage
     const xs = [
       screenBounds.topLeft.x,
       screenBounds.topRight.x,
@@ -106,12 +186,16 @@ export const Desktop = () => {
     const minY = Math.min(...ys);
     const maxY = Math.max(...ys);
 
+    // Convert to absolute pixels relative to image
+    const topLeftAbs = imageBounds.toAbsolute(minX, minY);
+    const bottomRightAbs = imageBounds.toAbsolute(maxX, maxY);
+
     return {
-      top: `${minY}%`,
-      left: `${minX}%`,
-      width: `${maxX - minX}%`,
-      height: `${maxY - minY}%`,
-      transform: 'none',
+      position: 'absolute',
+      top: `${topLeftAbs.y}px`,
+      left: `${topLeftAbs.x}px`,
+      width: `${bottomRightAbs.x - topLeftAbs.x}px`,
+      height: `${bottomRightAbs.y - topLeftAbs.y}px`,
       clipPath: getClipPath(),
     };
   };
