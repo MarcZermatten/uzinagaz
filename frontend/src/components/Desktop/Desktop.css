@@ -55,11 +55,9 @@
   overflow: hidden;
   background: #000;
   /* Bords courbés pour imiter l'écran CRT cathodique */
-  border-radius: 8px;
+  border-radius: 12px;
   /* Légère ombre intérieure pour l'effet de profondeur */
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
-  /* Effet de courbure CRT avec clip-path pour les bords arrondis */
-  clip-path: inset(0 round 8px);
 }
 
 .desktop-wallpaper {

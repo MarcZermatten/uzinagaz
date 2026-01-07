@@ -205,8 +205,6 @@ export const Desktop = () => {
 
   const renderClipPathSVG = () => {
     if (!screenBounds) return null;
-    const imageBounds = getImageBounds();
-    if (!imageBounds) return null;
 
     // Safety check - ensure all points exist
     if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
@@ -217,22 +215,39 @@ export const Desktop = () => {
 
     const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
 
-    // Convert percentage coords to absolute pixels
-    const tl = imageBounds.toAbsolute(topLeft.x, topLeft.y);
-    const tr = imageBounds.toAbsolute(topRight.x, topRight.y);
-    const br = imageBounds.toAbsolute(bottomRight.x, bottomRight.y);
-    const bl = imageBounds.toAbsolute(bottomLeft.x, bottomLeft.y);
-    const tm = imageBounds.toAbsolute(topMiddle.x, topMiddle.y);
-    const rm = imageBounds.toAbsolute(rightMiddle.x, rightMiddle.y);
-    const bm = imageBounds.toAbsolute(bottomMiddle.x, bottomMiddle.y);
-    const lm = imageBounds.toAbsolute(leftMiddle.x, leftMiddle.y);
+    // Calculate bounding box to normalize coordinates
+    const xs = [topLeft.x, topRight.x, bottomLeft.x, bottomRight.x, topMiddle.x, rightMiddle.x, bottomMiddle.x, leftMiddle.x];
+    const ys = [topLeft.y, topRight.y, bottomLeft.y, bottomRight.y, topMiddle.y, rightMiddle.y, bottomMiddle.y, leftMiddle.y];
+
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    // Convert to relative coordinates (0-1) within the bounding box
+    const normalize = (x: number, y: number) => ({
+      x: (x - minX) / width,
+      y: (y - minY) / height,
+    });
+
+    const tl = normalize(topLeft.x, topLeft.y);
+    const tr = normalize(topRight.x, topRight.y);
+    const br = normalize(bottomRight.x, bottomRight.y);
+    const bl = normalize(bottomLeft.x, bottomLeft.y);
+    const tm = normalize(topMiddle.x, topMiddle.y);
+    const rm = normalize(rightMiddle.x, rightMiddle.y);
+    const bm = normalize(bottomMiddle.x, bottomMiddle.y);
+    const lm = normalize(leftMiddle.x, leftMiddle.y);
 
     const pathData = `M ${tl.x} ${tl.y} Q ${tm.x} ${tm.y} ${tr.x} ${tr.y} Q ${rm.x} ${rm.y} ${br.x} ${br.y} Q ${bm.x} ${bm.y} ${bl.x} ${bl.y} Q ${lm.x} ${lm.y} ${tl.x} ${tl.y} Z`;
 
     return (
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
-          <clipPath id="crt-screen-mask" clipPathUnits="userSpaceOnUse">
+          <clipPath id="crt-screen-mask" clipPathUnits="objectBoundingBox">
             <path d={pathData} />
           </clipPath>
         </defs>
@@ -244,14 +259,13 @@ export const Desktop = () => {
     <div className="desktop-container">
       {renderClipPathSVG()}
       <div className="desk-background">
-        <div
-          className="monitor-frame"
-          style={{
-            ...getScreenStyle(),
-            clipPath: screenBounds ? 'url(#crt-screen-mask)' : 'none',
-          }}
-        >
-          <div className="monitor-screen">
+        <div className="monitor-frame" style={getScreenStyle()}>
+          <div
+            className="monitor-screen"
+            style={{
+              clipPath: screenBounds ? 'url(#crt-screen-mask)' : 'none',
+            }}
+          >
             <div className="desktop-wallpaper">
               <div className="desktop-icons">
                 {icons.map((icon) => (
