@@ -113,29 +113,6 @@ export const Desktop = () => {
     };
   };
 
-  const getClipPath = () => {
-    if (!screenBounds) return 'none';
-    const imageBounds = getImageBounds();
-    if (!imageBounds) return 'none';
-
-    const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
-
-    // Convert percentage coords to absolute pixels
-    const tl = imageBounds.toAbsolute(topLeft.x, topLeft.y);
-    const tr = imageBounds.toAbsolute(topRight.x, topRight.y);
-    const br = imageBounds.toAbsolute(bottomRight.x, bottomRight.y);
-    const bl = imageBounds.toAbsolute(bottomLeft.x, bottomLeft.y);
-    const tm = imageBounds.toAbsolute(topMiddle.x, topMiddle.y);
-    const rm = imageBounds.toAbsolute(rightMiddle.x, rightMiddle.y);
-    const bm = imageBounds.toAbsolute(bottomMiddle.x, bottomMiddle.y);
-    const lm = imageBounds.toAbsolute(leftMiddle.x, leftMiddle.y);
-
-    // Créer un path SVG avec des courbes de Bézier quadratiques pour les courbures CRT
-    const svgPath = `M ${tl.x}px ${tl.y}px Q ${tm.x}px ${tm.y}px ${tr.x}px ${tr.y}px Q ${rm.x}px ${rm.y}px ${br.x}px ${br.y}px Q ${bm.x}px ${bm.y}px ${bl.x}px ${bl.y}px Q ${lm.x}px ${lm.y}px ${tl.x}px ${tl.y}px Z`;
-
-    return `path('${svgPath}')`;
-  };
-
   const getScreenStyle = (): React.CSSProperties => {
     if (!screenBounds) {
       // Default positioning if no calibration
@@ -196,7 +173,6 @@ export const Desktop = () => {
       left: `${topLeftAbs.x}px`,
       width: `${bottomRightAbs.x - topLeftAbs.x}px`,
       height: `${bottomRightAbs.y - topLeftAbs.y}px`,
-      clipPath: getClipPath(),
     };
   };
 
@@ -209,10 +185,47 @@ export const Desktop = () => {
     return <ScreenCalibrator onSave={handleSaveBounds} />;
   }
 
+  const renderClipPathSVG = () => {
+    if (!screenBounds) return null;
+    const imageBounds = getImageBounds();
+    if (!imageBounds) return null;
+
+    const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
+
+    // Convert percentage coords to absolute pixels
+    const tl = imageBounds.toAbsolute(topLeft.x, topLeft.y);
+    const tr = imageBounds.toAbsolute(topRight.x, topRight.y);
+    const br = imageBounds.toAbsolute(bottomRight.x, bottomRight.y);
+    const bl = imageBounds.toAbsolute(bottomLeft.x, bottomLeft.y);
+    const tm = imageBounds.toAbsolute(topMiddle.x, topMiddle.y);
+    const rm = imageBounds.toAbsolute(rightMiddle.x, rightMiddle.y);
+    const bm = imageBounds.toAbsolute(bottomMiddle.x, bottomMiddle.y);
+    const lm = imageBounds.toAbsolute(leftMiddle.x, leftMiddle.y);
+
+    const pathData = `M ${tl.x} ${tl.y} Q ${tm.x} ${tm.y} ${tr.x} ${tr.y} Q ${rm.x} ${rm.y} ${br.x} ${br.y} Q ${bm.x} ${bm.y} ${bl.x} ${bl.y} Q ${lm.x} ${lm.y} ${tl.x} ${tl.y} Z`;
+
+    return (
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <defs>
+          <clipPath id="crt-screen-mask" clipPathUnits="userSpaceOnUse">
+            <path d={pathData} />
+          </clipPath>
+        </defs>
+      </svg>
+    );
+  };
+
   return (
     <div className="desktop-container">
+      {renderClipPathSVG()}
       <div className="desk-background">
-        <div className="monitor-frame" style={getScreenStyle()}>
+        <div
+          className="monitor-frame"
+          style={{
+            ...getScreenStyle(),
+            clipPath: screenBounds ? 'url(#crt-screen-mask)' : 'none',
+          }}
+        >
           <div className="monitor-screen">
             <div className="desktop-wallpaper">
               <div className="desktop-icons">
