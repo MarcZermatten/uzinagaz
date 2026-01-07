@@ -39,7 +39,24 @@ export const Desktop = () => {
     // Load screen bounds from localStorage
     const saved = localStorage.getItem('zerver-screen-bounds');
     if (saved) {
-      setScreenBounds(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+
+        // Validate that all 8 points exist (migration from old 4-point system)
+        const requiredPoints = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'topMiddle', 'rightMiddle', 'bottomMiddle', 'leftMiddle'];
+        const hasAllPoints = requiredPoints.every(point => parsed[point] && typeof parsed[point].x === 'number' && typeof parsed[point].y === 'number');
+
+        if (hasAllPoints) {
+          setScreenBounds(parsed);
+        } else {
+          // Old data format or corrupted - clear it
+          console.warn('Old or invalid calibration data detected, clearing...');
+          localStorage.removeItem('zerver-screen-bounds');
+        }
+      } catch (e) {
+        console.error('Failed to parse screen bounds:', e);
+        localStorage.removeItem('zerver-screen-bounds');
+      }
     }
 
     // Load image to get aspect ratio
@@ -114,26 +131,27 @@ export const Desktop = () => {
   };
 
   const getScreenStyle = (): React.CSSProperties => {
+    const defaultStyle = {
+      top: '15%',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '37%',
+      height: '38%',
+    };
+
     if (!screenBounds) {
-      // Default positioning if no calibration
-      return {
-        top: '15%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '37%',
-        height: '38%',
-      };
+      return defaultStyle;
+    }
+
+    // Safety check - ensure all points exist
+    if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
+        !screenBounds.topMiddle || !screenBounds.rightMiddle || !screenBounds.bottomMiddle || !screenBounds.leftMiddle) {
+      return defaultStyle;
     }
 
     const imageBounds = getImageBounds();
     if (!imageBounds) {
-      return {
-        top: '15%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '37%',
-        height: '38%',
-      };
+      return defaultStyle;
     }
 
     // Calculate bounding box from all 8 points in percentage
@@ -189,6 +207,13 @@ export const Desktop = () => {
     if (!screenBounds) return null;
     const imageBounds = getImageBounds();
     if (!imageBounds) return null;
+
+    // Safety check - ensure all points exist
+    if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
+        !screenBounds.topMiddle || !screenBounds.rightMiddle || !screenBounds.bottomMiddle || !screenBounds.leftMiddle) {
+      console.error('Missing screen bounds points');
+      return null;
+    }
 
     const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
 
