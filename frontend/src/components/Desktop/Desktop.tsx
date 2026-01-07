@@ -205,6 +205,8 @@ export const Desktop = () => {
 
   const renderClipPathSVG = () => {
     if (!screenBounds) return null;
+    const imageBounds = getImageBounds();
+    if (!imageBounds) return null;
 
     // Safety check - ensure all points exist
     if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
@@ -215,39 +217,39 @@ export const Desktop = () => {
 
     const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
 
-    // Calculate bounding box to normalize coordinates
+    // Calculate bounding box
     const xs = [topLeft.x, topRight.x, bottomLeft.x, bottomRight.x, topMiddle.x, rightMiddle.x, bottomMiddle.x, leftMiddle.x];
     const ys = [topLeft.y, topRight.y, bottomLeft.y, bottomRight.y, topMiddle.y, rightMiddle.y, bottomMiddle.y, leftMiddle.y];
 
     const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
 
-    const width = maxX - minX;
-    const height = maxY - minY;
+    // Convert calibration percentages to pixels within the bounding box
+    // These are relative to the top-left of monitor-frame
+    const toLocal = (x: number, y: number) => {
+      const abs = imageBounds.toAbsolute(x, y);
+      const frameTopLeft = imageBounds.toAbsolute(minX, minY);
+      return {
+        x: abs.x - frameTopLeft.x,
+        y: abs.y - frameTopLeft.y,
+      };
+    };
 
-    // Convert to relative coordinates (0-1) within the bounding box
-    const normalize = (x: number, y: number) => ({
-      x: (x - minX) / width,
-      y: (y - minY) / height,
-    });
-
-    const tl = normalize(topLeft.x, topLeft.y);
-    const tr = normalize(topRight.x, topRight.y);
-    const br = normalize(bottomRight.x, bottomRight.y);
-    const bl = normalize(bottomLeft.x, bottomLeft.y);
-    const tm = normalize(topMiddle.x, topMiddle.y);
-    const rm = normalize(rightMiddle.x, rightMiddle.y);
-    const bm = normalize(bottomMiddle.x, bottomMiddle.y);
-    const lm = normalize(leftMiddle.x, leftMiddle.y);
+    const tl = toLocal(topLeft.x, topLeft.y);
+    const tr = toLocal(topRight.x, topRight.y);
+    const br = toLocal(bottomRight.x, bottomRight.y);
+    const bl = toLocal(bottomLeft.x, bottomLeft.y);
+    const tm = toLocal(topMiddle.x, topMiddle.y);
+    const rm = toLocal(rightMiddle.x, rightMiddle.y);
+    const bm = toLocal(bottomMiddle.x, bottomMiddle.y);
+    const lm = toLocal(leftMiddle.x, leftMiddle.y);
 
     const pathData = `M ${tl.x} ${tl.y} Q ${tm.x} ${tm.y} ${tr.x} ${tr.y} Q ${rm.x} ${rm.y} ${br.x} ${br.y} Q ${bm.x} ${bm.y} ${bl.x} ${bl.y} Q ${lm.x} ${lm.y} ${tl.x} ${tl.y} Z`;
 
     return (
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
-          <clipPath id="crt-screen-mask" clipPathUnits="objectBoundingBox">
+          <clipPath id="crt-screen-mask" clipPathUnits="userSpaceOnUse">
             <path d={pathData} />
           </clipPath>
         </defs>
