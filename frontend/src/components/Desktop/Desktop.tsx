@@ -210,6 +210,13 @@ export const Desktop = () => {
   return (
     <div className="desktop-container">
       <div className="desk-background">
+        {/* Real img element instead of background for precise positioning */}
+        <img
+          src="/assets/retro-desk-scene.png"
+          alt="Retro desk scene"
+          className="desk-background-image"
+        />
+
         <div className="monitor-frame" style={getMonitorFrameStyle()}>
           <div className="monitor-screen">
             <div className="desktop-wallpaper">

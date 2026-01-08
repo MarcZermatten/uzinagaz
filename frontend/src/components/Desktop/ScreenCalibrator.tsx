@@ -142,7 +142,11 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div className="background-preview" />
+        <img
+          src="/assets/retro-desk-scene.png"
+          alt="Background preview"
+          className="background-preview"
+        />
 
         {showGrid && (
           <div className="calibration-grid">

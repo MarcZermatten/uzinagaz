@@ -22,17 +22,18 @@
 
 .background-preview {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/assets/retro-desk-scene.png');
-  background-size: contain; /* Never deform the image */
-  background-position: center;
-  background-repeat: no-repeat;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   opacity: 0.8;
+  pointer-events: none;
 }
 
 .calibration-grid {
