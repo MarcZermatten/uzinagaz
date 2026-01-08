@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS games (
     release_year INT,
     developer VARCHAR(100),
     genre VARCHAR(50),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     uploaded_by UUID REFERENCES users(id)
 );
 

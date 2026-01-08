@@ -109,7 +109,7 @@ export const useDesktopStore = create<DesktopState>((set) => ({
       position: { x: 260, y: 220 },
     },
   ],
-  wallpaper: '/assets/wallpaper-xp-bliss.jpg',
+  wallpaper: '/assets/wallpaper-xp-bliss.svg',
   bootComplete: false,
   crtEnabled: true,
   scanlineIntensity: 0.5,

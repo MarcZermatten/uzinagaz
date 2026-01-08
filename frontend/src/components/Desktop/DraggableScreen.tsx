@@ -13,10 +13,10 @@ interface ScreenPosition {
 }
 
 const DEFAULT_POSITION: ScreenPosition = {
-  x: 31.5,
-  y: 24.5,
-  width: 37,
-  height: 38.5,
+  x: 47.558049651849075,
+  y: 25.563913414435408,
+  width: 43.45782719435737,
+  height: 37.18113244514107,
 };
 
 export const DraggableScreen = () => {
@@ -27,6 +27,7 @@ export const DraggableScreen = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [showSavedNotification, setShowSavedNotification] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const positionRef = useRef<ScreenPosition>(position);
 
@@ -35,14 +36,59 @@ export const DraggableScreen = () => {
     positionRef.current = position;
   }, [position]);
 
+  // Load image aspect ratio
   useEffect(() => {
-    // Load saved position
+    const img = new Image();
+    img.src = '/assets/retro-desk-scene.png';
+    img.onload = () => {
+      setImageAspectRatio(img.width / img.height);
+    };
+  }, []);
+
+  // Calculate where the image is with object-fit: cover
+  const getImageBounds = () => {
+    if (!imageAspectRatio) return null;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowAspectRatio = windowWidth / windowHeight;
+
+    let imageWidth: number, imageHeight: number, offsetX: number, offsetY: number;
+
+    if (windowAspectRatio > imageAspectRatio) {
+      // Window is wider - image fills width, crops top/bottom
+      imageWidth = windowWidth;
+      imageHeight = windowWidth / imageAspectRatio;
+      offsetX = 0;
+      offsetY = (windowHeight - imageHeight) / 2;
+    } else {
+      // Window is taller - image fills height, crops sides
+      imageHeight = windowHeight;
+      imageWidth = windowHeight * imageAspectRatio;
+      offsetX = (windowWidth - imageWidth) / 2;
+      offsetY = 0;
+    }
+
+    return { imageWidth, imageHeight, offsetX, offsetY };
+  };
+
+  useEffect(() => {
+    // MIGRATION: Clear old viewport-based positions only once
+    const migrated = localStorage.getItem('zerver-screen-migration-v2');
+    if (!migrated) {
+      console.warn('🔄 Clearing old position data - please recalibrate with new responsive system (press E)');
+      localStorage.removeItem('zerver-screen-position');
+      localStorage.setItem('zerver-screen-migration-v2', 'done');
+    }
+
+    // Load saved position (if any)
     const saved = localStorage.getItem('zerver-screen-position');
     if (saved) {
       try {
         const savedPos = JSON.parse(saved);
         setPosition(savedPos);
         positionRef.current = savedPos;
+        console.log('✅ Loaded saved position:', savedPos);
       } catch (e) {
         console.error('Failed to load screen position:', e);
       }
@@ -93,16 +139,34 @@ export const DraggableScreen = () => {
       setIsDragging(true);
     }
 
+    const imageBounds = getImageBounds();
+    if (!imageBounds) return;
+
+    // Calculate current position in absolute pixels
+    const currentLeft = imageBounds.offsetX + (position.x / 100) * imageBounds.imageWidth;
+    const currentTop = imageBounds.offsetY + (position.y / 100) * imageBounds.imageHeight;
+
     setDragStart({
-      x: e.clientX - (position.x * window.innerWidth / 100),
-      y: e.clientY - (position.y * window.innerHeight / 100),
+      x: e.clientX - currentLeft,
+      y: e.clientY - currentTop,
     });
   };
 
   const handleMouseMove = (e: MouseEvent) => {
+    const imageBounds = getImageBounds();
+    if (!imageBounds) return;
+
     if (isDragging) {
-      const newX = ((e.clientX - dragStart.x) / window.innerWidth) * 100;
-      const newY = ((e.clientY - dragStart.y) / window.innerHeight) * 100;
+      // Convert absolute position to % of image
+      const absoluteX = e.clientX - dragStart.x;
+      const absoluteY = e.clientY - dragStart.y;
+
+      const imageX = absoluteX - imageBounds.offsetX;
+      const imageY = absoluteY - imageBounds.offsetY;
+
+      const newX = (imageX / imageBounds.imageWidth) * 100;
+      const newY = (imageY / imageBounds.imageHeight) * 100;
+
       setPosition(prev => ({
         ...prev,
         x: Math.max(0, Math.min(100 - prev.width, newX)),
@@ -116,8 +180,8 @@ export const DraggableScreen = () => {
       const dx = e.clientX - centerX;
       const dy = e.clientY - centerY;
 
-      const newWidth = (Math.abs(dx) * 2 / window.innerWidth) * 100;
-      const newHeight = (Math.abs(dy) * 2 / window.innerHeight) * 100;
+      const newWidth = (Math.abs(dx) * 2 / imageBounds.imageWidth) * 100;
+      const newHeight = (Math.abs(dy) * 2 / imageBounds.imageHeight) * 100;
 
       setPosition(prev => ({
         ...prev,
@@ -143,18 +207,49 @@ export const DraggableScreen = () => {
     }
   }, [isDragging, isResizing, dragStart]);
 
+  // Force re-render on window resize to recalculate position
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    const handleResize = () => forceUpdate({});
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate absolute position from image-relative percentages
+  const getAbsoluteStyle = (): React.CSSProperties => {
+    const imageBounds = getImageBounds();
+    if (!imageBounds) {
+      // Fallback to viewport percentages if image not loaded
+      return {
+        position: 'absolute',
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        width: `${position.width}%`,
+        height: `${position.height}%`,
+      };
+    }
+
+    // Convert image % to absolute pixels
+    const left = imageBounds.offsetX + (position.x / 100) * imageBounds.imageWidth;
+    const top = imageBounds.offsetY + (position.y / 100) * imageBounds.imageHeight;
+    const width = (position.width / 100) * imageBounds.imageWidth;
+    const height = (position.height / 100) * imageBounds.imageHeight;
+
+    return {
+      position: 'absolute',
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+  };
+
   return (
     <>
       <div
         ref={frameRef}
         className="monitor-frame draggable-frame"
-        style={{
-          position: 'absolute',
-          left: `${position.x}%`,
-          top: `${position.y}%`,
-          width: `${position.width}%`,
-          height: `${position.height}%`,
-        }}
+        style={getAbsoluteStyle()}
         onMouseDown={handleMouseDown}
       >
         <div className="monitor-screen">
@@ -174,23 +269,6 @@ export const DraggableScreen = () => {
         <div className="resize-handle resize-ne"></div>
         <div className="resize-handle resize-sw"></div>
         <div className="resize-handle resize-se"></div>
-      </div>
-
-      {/* Instructions */}
-      <div style={{
-        position: 'fixed',
-        bottom: '10px',
-        right: '10px',
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: '#00ff00',
-        padding: '8px 12px',
-        borderRadius: '4px',
-        fontSize: '12px',
-        fontFamily: 'monospace',
-        border: '1px solid #00ff00',
-        zIndex: 9999,
-      }}>
-        Appuyez sur <strong>E</strong> pour déplacer/redimensionner l'écran
       </div>
 
       {/* Save notification */}

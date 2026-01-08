@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Sky gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3E8FCC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5BA3D8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6DB3E8;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Grass layers -->
+    <linearGradient id="grassBack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#5E9A28;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#72AE35;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="grassMain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#72AE35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8EC548;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="grassFront" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8EC548;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#AADB5E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1920" height="1080" fill="url(#skyGrad)"/>
+
+  <!-- Clouds - Bliss style -->
+  <g opacity="0.95">
+    <ellipse cx="180" cy="100" rx="90" ry="32" fill="#FFFFFF"/>
+    <ellipse cx="230" cy="110" rx="75" ry="28" fill="#FFFFFF"/>
+    <ellipse cx="140" cy="115" rx="65" ry="25" fill="#FFFFFF"/>
+  </g>
+
+  <g opacity="0.92">
+    <ellipse cx="550" cy="80" rx="120" ry="38" fill="#FFFFFF"/>
+    <ellipse cx="610" cy="95" rx="90" ry="32" fill="#FFFFFF"/>
+    <ellipse cx="500" cy="100" rx="80" ry="28" fill="#FFFFFF"/>
+  </g>
+
+  <g opacity="0.95">
+    <ellipse cx="1050" cy="130" rx="140" ry="45" fill="#FFFFFF"/>
+    <ellipse cx="1120" cy="145" rx="100" ry="35" fill="#FFFFFF"/>
+    <ellipse cx="980" cy="150" rx="85" ry="30" fill="#FFFFFF"/>
+  </g>
+
+  <g opacity="0.88">
+    <ellipse cx="1500" cy="95" rx="105" ry="35" fill="#FFFFFF"/>
+    <ellipse cx="1560" cy="105" rx="80" ry="30" fill="#FFFFFF"/>
+  </g>
+
+  <g opacity="0.85">
+    <ellipse cx="1750" cy="160" rx="90" ry="32" fill="#FFFFFF"/>
+  </g>
+
+  <!-- THE ICONIC BLISS HILL - Single dominant hill center-right -->
+
+  <!-- Far background - gentle left slope -->
+  <path d="M 0,500 Q 300,480 600,490 Q 900,500 1200,520 Q 1500,540 1800,560 L 1920,570 L 1920,1080 L 0,1080 Z"
+        fill="url(#grassBack)"/>
+
+  <!-- THE MAIN HILL - Bliss's signature smooth dome on center-right -->
+  <path d="M 0,620 Q 400,610 700,600 Q 1000,550 1200,480 Q 1400,420 1600,460 Q 1750,500 1920,540 L 1920,1080 L 0,1080 Z"
+        fill="url(#grassMain)"/>
+
+  <!-- Foreground - very gentle rolling -->
+  <path d="M 0,720 Q 480,710 960,715 Q 1440,720 1920,710 L 1920,1080 L 0,1080 Z"
+        fill="url(#grassFront)"/>
+
+  <!-- Sunlit highlight on main hill - THE KEY BLISS ELEMENT -->
+  <ellipse cx="1200" cy="520" rx="350" ry="120" fill="#BFE075" opacity="0.4"/>
+  <ellipse cx="1350" cy="480" rx="280" ry="95" fill="#D4ED88" opacity="0.35"/>
+
+  <!-- Subtle shadow in valley before hill -->
+  <ellipse cx="700" cy="620" rx="250" ry="80" fill="#4E8920" opacity="0.12"/>
+
+  <!-- Light patch on foreground -->
+  <ellipse cx="500" cy="750" rx="200" ry="65" fill="#C8E680" opacity="0.25"/>
+</svg>

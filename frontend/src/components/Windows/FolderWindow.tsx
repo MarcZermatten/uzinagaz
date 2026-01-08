@@ -23,7 +23,9 @@ export const FolderWindow = ({ consoleId }: FolderWindowProps) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🎮 Loading games for console:', consoleId);
       const response = await gameService.getGames(consoleId);
+      console.log('✅ Loaded games:', response.games.length, 'games for console', consoleId);
       setGames(response.games);
     } catch (err) {
       setError('Failed to load games');

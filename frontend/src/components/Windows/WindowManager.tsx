@@ -14,7 +14,7 @@ export const WindowManager = () => {
       case 'achievements':
         return <AchievementsWindow />;
       case 'folder':
-        return <FolderWindow consoleId={window.data as string} />;
+        return <FolderWindow consoleId={window.content as string} />;
       case 'profile':
         return (
           <div>

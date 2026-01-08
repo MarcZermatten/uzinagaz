@@ -20,6 +20,7 @@ export const Window = ({ window, children }: WindowProps) => {
   } = useWindowStore();
 
   const handleDragStop = (_e: any, data: { x: number; y: number }) => {
+    console.log('Drag stop:', window.id, 'Position:', data.x, data.y);
     updateWindowPosition(window.id, data.x, data.y);
   };
 
@@ -62,7 +63,6 @@ export const Window = ({ window, children }: WindowProps) => {
           onResizeStop={handleResizeStop}
           minWidth={400}
           minHeight={300}
-          bounds="parent"
           dragHandleClassName="window-titlebar"
           enableResizing={!window.maximized}
           disableDragging={window.maximized}

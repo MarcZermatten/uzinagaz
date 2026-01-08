@@ -116,9 +116,7 @@
 .desktop-wallpaper {
   width: 100%;
   height: 100%;
-  background: url('/assets/wallpaper-xp-bliss.jpg') center/cover;
-  /* Fallback gradient if image not found */
-  background: linear-gradient(180deg, #5c9ee7 0%, #3a82c4 50%, #6fb03a 100%);
+  background: url('/assets/wallpaper-xp-bliss.svg') center/cover;
   position: relative;
   padding: 10px;
   /* Léger glow pour simuler la luminescence CRT */
