@@ -130,28 +130,46 @@ export const Desktop = () => {
     };
   };
 
-  const getScreenStyle = (): React.CSSProperties => {
-    const defaultStyle = {
-      top: '15%',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '37%',
-      height: '38%',
-    };
 
-    if (!screenBounds) {
-      return defaultStyle;
-    }
+  // Don't show desktop when playing a game
+  if (isPlaying) {
+    return null;
+  }
 
-    // Safety check - ensure all points exist
-    if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
-        !screenBounds.topMiddle || !screenBounds.rightMiddle || !screenBounds.bottomMiddle || !screenBounds.leftMiddle) {
-      return defaultStyle;
+  if (showCalibrator) {
+    return <ScreenCalibrator onSave={handleSaveBounds} />;
+  }
+
+  // Plus simple : on ne fait pas de clip-path compliqué
+  // On applique juste un border-radius pour les coins arrondis
+  const getScreenClipPath = () => {
+    if (!screenBounds || !imageAspectRatio) return 'none';
+
+    // Pour l'instant, on utilise juste un border-radius
+    // Les courbes Bézier sont trop complexes pour clip-path cross-browser
+    return 'none';
+  };
+
+  const getMonitorFrameStyle = (): React.CSSProperties => {
+    if (!screenBounds || !imageAspectRatio) {
+      return {
+        top: '15%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '37%',
+        height: '38%',
+      };
     }
 
     const imageBounds = getImageBounds();
     if (!imageBounds) {
-      return defaultStyle;
+      return {
+        top: '15%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '37%',
+        height: '38%',
+      };
     }
 
     // Calculate bounding box from all 8 points in percentage
@@ -194,80 +212,11 @@ export const Desktop = () => {
     };
   };
 
-  // Don't show desktop when playing a game
-  if (isPlaying) {
-    return null;
-  }
-
-  if (showCalibrator) {
-    return <ScreenCalibrator onSave={handleSaveBounds} />;
-  }
-
-  const renderClipPathSVG = () => {
-    if (!screenBounds) return null;
-    const imageBounds = getImageBounds();
-    if (!imageBounds) return null;
-
-    // Safety check - ensure all points exist
-    if (!screenBounds.topLeft || !screenBounds.topRight || !screenBounds.bottomLeft || !screenBounds.bottomRight ||
-        !screenBounds.topMiddle || !screenBounds.rightMiddle || !screenBounds.bottomMiddle || !screenBounds.leftMiddle) {
-      console.error('Missing screen bounds points');
-      return null;
-    }
-
-    const { topLeft, topRight, bottomRight, bottomLeft, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = screenBounds;
-
-    // Calculate bounding box
-    const xs = [topLeft.x, topRight.x, bottomLeft.x, bottomRight.x, topMiddle.x, rightMiddle.x, bottomMiddle.x, leftMiddle.x];
-    const ys = [topLeft.y, topRight.y, bottomLeft.y, bottomRight.y, topMiddle.y, rightMiddle.y, bottomMiddle.y, leftMiddle.y];
-
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-
-    // Convert calibration percentages to pixels within the bounding box
-    // These are relative to the top-left of monitor-frame
-    const toLocal = (x: number, y: number) => {
-      const abs = imageBounds.toAbsolute(x, y);
-      const frameTopLeft = imageBounds.toAbsolute(minX, minY);
-      return {
-        x: abs.x - frameTopLeft.x,
-        y: abs.y - frameTopLeft.y,
-      };
-    };
-
-    const tl = toLocal(topLeft.x, topLeft.y);
-    const tr = toLocal(topRight.x, topRight.y);
-    const br = toLocal(bottomRight.x, bottomRight.y);
-    const bl = toLocal(bottomLeft.x, bottomLeft.y);
-    const tm = toLocal(topMiddle.x, topMiddle.y);
-    const rm = toLocal(rightMiddle.x, rightMiddle.y);
-    const bm = toLocal(bottomMiddle.x, bottomMiddle.y);
-    const lm = toLocal(leftMiddle.x, leftMiddle.y);
-
-    const pathData = `M ${tl.x} ${tl.y} Q ${tm.x} ${tm.y} ${tr.x} ${tr.y} Q ${rm.x} ${rm.y} ${br.x} ${br.y} Q ${bm.x} ${bm.y} ${bl.x} ${bl.y} Q ${lm.x} ${lm.y} ${tl.x} ${tl.y} Z`;
-
-    return (
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <defs>
-          <clipPath id="crt-screen-mask" clipPathUnits="userSpaceOnUse">
-            <path d={pathData} />
-          </clipPath>
-        </defs>
-      </svg>
-    );
-  };
-
   return (
     <div className="desktop-container">
-      {renderClipPathSVG()}
       <div className="desk-background">
-        <div className="monitor-frame" style={getScreenStyle()}>
-          <div
-            className="monitor-screen"
-            style={{
-              clipPath: screenBounds ? 'url(#crt-screen-mask)' : 'none',
-            }}
-          >
+        <div className="monitor-frame" style={getMonitorFrameStyle()}>
+          <div className="monitor-screen">
             <div className="desktop-wallpaper">
               <div className="desktop-icons">
                 {icons.map((icon) => (
