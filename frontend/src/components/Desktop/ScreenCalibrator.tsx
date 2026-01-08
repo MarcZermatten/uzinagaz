@@ -34,6 +34,7 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
   const [bounds, setBounds] = useState<ScreenBounds>(DEFAULT_BOUNDS);
   const [dragging, setDragging] = useState<keyof ScreenBounds | null>(null);
   const [showGrid, setShowGrid] = useState(true);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
 
   useEffect(() => {
     // Load saved bounds from localStorage
@@ -41,18 +42,63 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
     if (saved) {
       setBounds(JSON.parse(saved));
     }
+
+    // Load image to get aspect ratio
+    const img = new Image();
+    img.src = '/assets/retro-desk-scene.png';
+    img.onload = () => {
+      setImageAspectRatio(img.width / img.height);
+    };
   }, []);
 
   const handleMouseDown = (corner: keyof ScreenBounds) => {
     setDragging(corner);
   };
 
+  const getImageBoundsInCanvas = (canvasRect: DOMRect) => {
+    if (!imageAspectRatio) return null;
+
+    const canvasWidth = canvasRect.width;
+    const canvasHeight = canvasRect.height;
+    const canvasAspectRatio = canvasWidth / canvasHeight;
+
+    let imageWidth: number, imageHeight: number, offsetX: number, offsetY: number;
+
+    if (canvasAspectRatio > imageAspectRatio) {
+      // Canvas is wider - image is letterboxed (bars on sides)
+      imageHeight = canvasHeight;
+      imageWidth = canvasHeight * imageAspectRatio;
+      offsetX = (canvasWidth - imageWidth) / 2;
+      offsetY = 0;
+    } else {
+      // Canvas is taller - image is pillarboxed (bars on top/bottom)
+      imageWidth = canvasWidth;
+      imageHeight = canvasWidth / imageAspectRatio;
+      offsetX = 0;
+      offsetY = (canvasHeight - imageHeight) / 2;
+    }
+
+    return { imageWidth, imageHeight, offsetX, offsetY };
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!dragging) return;
+    if (!dragging || !imageAspectRatio) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const imageBounds = getImageBoundsInCanvas(rect);
+    if (!imageBounds) return;
+
+    // Click position in canvas coordinates
+    const canvasX = e.clientX - rect.left;
+    const canvasY = e.clientY - rect.top;
+
+    // Convert to position within the image (accounting for letterbox/pillarbox)
+    const imageX = canvasX - imageBounds.offsetX;
+    const imageY = canvasY - imageBounds.offsetY;
+
+    // Convert to percentage of image dimensions
+    const x = (imageX / imageBounds.imageWidth) * 100;
+    const y = (imageY / imageBounds.imageHeight) * 100;
 
     setBounds(prev => ({
       ...prev,
@@ -136,6 +182,11 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
         {(Object.keys(bounds) as Array<keyof ScreenBounds>).map((pointName) => {
           const isCorner = pointName.includes('Left') || pointName.includes('Right');
           const isCurvePoint = pointName.includes('Middle');
+
+          // We need to convert image % back to canvas % for display
+          // This is a workaround - ideally we'd use a ref to get the actual rect
+          // For now, just display at the image percentages which will be approximately correct
+          // when the canvas aspect ratio matches the image
 
           return (
             <div

@@ -203,6 +203,15 @@ export const Desktop = () => {
     const topLeftAbs = imageBounds.toAbsolute(minX, minY);
     const bottomRightAbs = imageBounds.toAbsolute(maxX, maxY);
 
+    // Debug logging
+    console.log('🖥️ Monitor Frame Debug:');
+    console.log(`  Window: ${window.innerWidth}x${window.innerHeight}`);
+    console.log(`  Image Aspect Ratio: ${imageAspectRatio}`);
+    console.log(`  Image Bounds: width=${imageBounds.width.toFixed(2)}px height=${imageBounds.height.toFixed(2)}px offset=(${imageBounds.offsetX.toFixed(2)}, ${imageBounds.offsetY.toFixed(2)})`);
+    console.log(`  Calibration %: minX=${minX.toFixed(2)}% maxX=${maxX.toFixed(2)}% minY=${minY.toFixed(2)}% maxY=${maxY.toFixed(2)}%`);
+    console.log(`  Frame Position: top=${topLeftAbs.y.toFixed(2)}px left=${topLeftAbs.x.toFixed(2)}px`);
+    console.log(`  Frame Size: ${(bottomRightAbs.x - topLeftAbs.x).toFixed(2)}px x ${(bottomRightAbs.y - topLeftAbs.y).toFixed(2)}px`);
+
     return {
       position: 'absolute',
       top: `${topLeftAbs.y}px`,
