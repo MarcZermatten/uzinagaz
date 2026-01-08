@@ -36,27 +36,13 @@ export const Desktop = () => {
   const [, forceUpdate] = useState({});
 
   useEffect(() => {
-    // Load screen bounds from localStorage
+    // FORCE CLEAR old calibration data - coordinate system changed
+    // TODO: Remove this after users have recalibrated
     const saved = localStorage.getItem('zerver-screen-bounds');
     if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-
-        // Validate that all 8 points exist (migration from old 4-point system)
-        const requiredPoints = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'topMiddle', 'rightMiddle', 'bottomMiddle', 'leftMiddle'];
-        const hasAllPoints = requiredPoints.every(point => parsed[point] && typeof parsed[point].x === 'number' && typeof parsed[point].y === 'number');
-
-        if (hasAllPoints) {
-          setScreenBounds(parsed);
-        } else {
-          // Old data format or corrupted - clear it
-          console.warn('Old or invalid calibration data detected, clearing...');
-          localStorage.removeItem('zerver-screen-bounds');
-        }
-      } catch (e) {
-        console.error('Failed to parse screen bounds:', e);
-        localStorage.removeItem('zerver-screen-bounds');
-      }
+      console.warn('🔄 Clearing old calibration data due to coordinate system update. Please recalibrate with Ctrl+Shift+C');
+      localStorage.removeItem('zerver-screen-bounds');
+      setScreenBounds(null);
     }
 
     // Load image to get aspect ratio
