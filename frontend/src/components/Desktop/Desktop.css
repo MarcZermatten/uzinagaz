@@ -21,14 +21,11 @@
 
 .desk-background-image {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   pointer-events: none;
@@ -58,6 +55,62 @@
   border-radius: 12px;
   /* Légère ombre intérieure pour l'effet de profondeur */
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+/* Draggable frame */
+.draggable-frame {
+  cursor: default;
+}
+
+.draggable-frame.editing {
+  outline: 3px dashed #00ff00;
+  cursor: move;
+}
+
+.draggable-frame.editing .monitor-screen {
+  pointer-events: none;
+}
+
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #00ff00;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.draggable-frame.editing .resize-handle {
+  opacity: 1;
+}
+
+.resize-nw {
+  top: -10px;
+  left: -10px;
+  cursor: nw-resize;
+}
+
+.resize-ne {
+  top: -10px;
+  right: -10px;
+  cursor: ne-resize;
+}
+
+.resize-sw {
+  bottom: -10px;
+  left: -10px;
+  cursor: sw-resize;
+}
+
+.resize-se {
+  bottom: -10px;
+  right: -10px;
+  cursor: se-resize;
 }
 
 .desktop-wallpaper {
