@@ -1,0 +1,148 @@
+{
+  "games": [
+    {
+      "id": "430ddd08",
+      "console_id": "gba",
+      "title": "Super Mario Advance 2 Super Mario World",
+      "rom_filename": "Super Mario Advance 2_ Super Mario World (1).zip",
+      "rom_size_bytes": 1503859,
+      "rom_path": "/roms/gba/Super Mario Advance 2_ Super Mario World (1).zip",
+      "core": "gba",
+      "console_name": "Game Boy Advance",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "0a800edd",
+      "console_id": "gba",
+      "title": "Super Mario Advance 2 Super Mario World",
+      "rom_filename": "Super Mario Advance 2_ Super Mario World.zip",
+      "rom_size_bytes": 1503859,
+      "rom_path": "/roms/gba/Super Mario Advance 2_ Super Mario World.zip",
+      "core": "gba",
+      "console_name": "Game Boy Advance",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "2a26f687",
+      "console_id": "gba",
+      "title": "Super Mario Advance 4 - Super Mario Bros 3",
+      "rom_filename": "Super Mario Advance 4 - Super Mario Bros 3 (E)(Menace).zip",
+      "rom_size_bytes": 2702032,
+      "rom_path": "/roms/gba/Super Mario Advance 4 - Super Mario Bros 3 (E)(Menace).zip",
+      "core": "gba",
+      "console_name": "Game Boy Advance",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "248b1edd",
+      "console_id": "n64",
+      "title": "GoldenEye 007",
+      "rom_filename": "GoldenEye 007.zip",
+      "rom_size_bytes": 10705290,
+      "rom_path": "/roms/n64/GoldenEye 007.zip",
+      "core": "n64",
+      "console_name": "Nintendo 64",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "08334b41",
+      "console_id": "n64",
+      "title": "Legend of Zelda, The - Ocarina of Time",
+      "rom_filename": "Legend of Zelda, The - Ocarina of Time (U) (V1.2) [!].zip",
+      "rom_size_bytes": 26625809,
+      "rom_path": "/roms/n64/Legend of Zelda, The - Ocarina of Time (U) (V1.2) [!].zip",
+      "core": "n64",
+      "console_name": "Nintendo 64",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "9e97fd10",
+      "console_id": "n64",
+      "title": "Legend of Zelda, The Majora's Mask",
+      "rom_filename": "Legend of Zelda, The_ Majora's Mask.zip",
+      "rom_size_bytes": 27148385,
+      "rom_path": "/roms/n64/Legend of Zelda, The_ Majora's Mask.zip",
+      "core": "n64",
+      "console_name": "Nintendo 64",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "e50adb13",
+      "console_id": "n64",
+      "title": "Super Mario 64",
+      "rom_filename": "Super Mario 64.zip",
+      "rom_size_bytes": 6099886,
+      "rom_path": "/roms/n64/Super Mario 64.zip",
+      "core": "n64",
+      "console_name": "Nintendo 64",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "b816d3bc",
+      "console_id": "nes",
+      "title": "Legend of Zelda, The",
+      "rom_filename": "Legend of Zelda, The.zip",
+      "rom_size_bytes": 63757,
+      "rom_path": "/roms/nes/Legend of Zelda, The.zip",
+      "core": "nes",
+      "console_name": "Nintendo Entertainment System",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "dfaf863f",
+      "console_id": "psx",
+      "title": "Metal Gear Solid",
+      "rom_filename": "Metal Gear Solid.zip",
+      "rom_size_bytes": 438725379,
+      "rom_path": "/roms/psx/Metal Gear Solid.zip",
+      "core": "psx",
+      "console_name": "PlayStation",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "dbe9d780",
+      "console_id": "psx",
+      "title": "Oddworld Abe's Exoddus",
+      "rom_filename": "Oddworld_ Abe's Exoddus.zip",
+      "rom_size_bytes": 402373997,
+      "rom_path": "/roms/psx/Oddworld_ Abe's Exoddus.zip",
+      "core": "psx",
+      "console_name": "PlayStation",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "1598558d",
+      "console_id": "psx",
+      "title": "Oddworld Abe's Oddysee",
+      "rom_filename": "Oddworld_ Abe's Oddysee.zip",
+      "rom_size_bytes": 395959370,
+      "rom_path": "/roms/psx/Oddworld_ Abe's Oddysee.zip",
+      "core": "psx",
+      "console_name": "PlayStation",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "6c9ff1f4",
+      "console_id": "snes",
+      "title": "Donkey Kong Country",
+      "rom_filename": "Donkey Kong Country (U) (V1.2) [!].zip",
+      "rom_size_bytes": 2557476,
+      "rom_path": "/roms/snes/Donkey Kong Country (U) (V1.2) [!].zip",
+      "core": "snes",
+      "console_name": "Super Nintendo",
+      "created_at": "2026-01-09T00:00:00Z"
+    },
+    {
+      "id": "2e8c569d",
+      "console_id": "snes",
+      "title": "Legend of Zelda, The A Link to the Past",
+      "rom_filename": "Legend of Zelda, The_ A Link to the Past.zip",
+      "rom_size_bytes": 685463,
+      "rom_path": "/roms/snes/Legend of Zelda, The_ A Link to the Past.zip",
+      "core": "snes",
+      "console_name": "Super Nintendo",
+      "created_at": "2026-01-09T00:00:00Z"
+    }
+  ],
+  "total": 13
+}

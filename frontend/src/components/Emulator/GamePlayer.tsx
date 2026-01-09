@@ -85,7 +85,7 @@ export const GamePlayer = () => {
       <div className="emulator-wrapper">
         <EmulatorJS
           EJS_core={getCoreSystem(currentGame.console_id) as any}
-          EJS_gameUrl={`http://localhost:8080/api/v1/games/${currentGame.id}/rom`}
+          EJS_gameUrl={`/api/v1/games/${currentGame.id}/rom`}
           EJS_pathtodata="/data/"
         />
       </div>
