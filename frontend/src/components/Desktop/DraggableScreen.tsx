@@ -26,6 +26,7 @@ export const DraggableScreen = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [showSavedNotification, setShowSavedNotification] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isEditMode, setIsEditMode] = useState(false);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);

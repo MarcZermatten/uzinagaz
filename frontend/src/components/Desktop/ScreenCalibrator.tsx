@@ -184,7 +184,6 @@ export const ScreenCalibrator = ({ onSave }: { onSave: (bounds: ScreenBounds) =>
 
         {/* Draggable points */}
         {(Object.keys(bounds) as Array<keyof ScreenBounds>).map((pointName) => {
-          const isCorner = pointName.includes('Left') || pointName.includes('Right');
           const isCurvePoint = pointName.includes('Middle');
 
           // We need to convert image % back to canvas % for display

@@ -1,22 +1,45 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: zerver_postgres
-    environment:
-      POSTGRES_DB: zerver
-      POSTGRES_USER: zerver
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zerver"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # Utilise le PostgreSQL existant sur le serveur (port 5432)
+  # Connection: host.docker.internal:5432 ou 192.168.1.21:5432
 
-volumes:
-  postgres_data:
+  zerver-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zerver-backend
+    restart: unless-stopped
+    ports:
+      - "3005:8080"
+    environment:
+      - DATABASE_URL=postgres://marc:postgres123@172.17.0.1:5432/zerver
+      - JWT_SECRET=zerver-jwt-secret-change-in-production-2026
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - CORS_ORIGIN=https://zerver.zarante.duckdns.org
+      - ROM_STORAGE_PATH=/storage/roms
+      - SAVE_STORAGE_PATH=/storage/saves
+      - RUST_LOG=info
+    volumes:
+      - /mnt/storage/roms:/storage/roms
+      - /mnt/storage/saves:/storage/saves
+    networks:
+      - zerver-network
+
+  zerver-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zerver-frontend
+    restart: unless-stopped
+    ports:
+      - "3004:80"
+    volumes:
+      - /mnt/storage/roms:/storage/roms:ro
+    networks:
+      - zerver-network
+
+networks:
+  zerver-network:
+    driver: bridge
